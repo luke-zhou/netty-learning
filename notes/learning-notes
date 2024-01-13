@@ -1,0 +1,4 @@
+0.0.1
+抄了一个用NIO SocketChannel 写的server，我觉得netty应该是以这个为基础写出来的。
+在blocking写法下，设置server channel的blocking为false会导致channel.accept 直接返回null。
+在non-blocking写法下，设置server channel的blocking为true会导致在将channel注册到selector时报错。
