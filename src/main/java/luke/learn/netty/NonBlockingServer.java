@@ -11,45 +11,20 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class NonBlockingServer {
     public static void main(String[] args) throws IOException {
         ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
         serverSocketChannel.bind(new InetSocketAddress(8080));
-        serverSocketChannel.configureBlocking(true);
-        Selector selector = Selector.open();
-        serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+        serverSocketChannel.configureBlocking(false);
 
-        while (true){
-            selector.select();
-            Set<SelectionKey> selectionKeys = selector.selectedKeys();
-            Iterator<SelectionKey> iterator = selectionKeys.iterator();
+        ExecutorService masterPool = Executors.newSingleThreadExecutor();
 
-            while(iterator.hasNext()){
-                SelectionKey key = iterator.next();
-                iterator.remove();
-                if (key.isAcceptable()){
-                    SocketChannel socketChannel = serverSocketChannel.accept();
-                    socketChannel.configureBlocking(false);
-                    socketChannel.register(selector, SelectionKey.OP_READ);
-                }
-                if (key.isReadable()){
-                    SocketChannel socketChannel = (SocketChannel) key.channel();
-                    ByteBuffer buffer = ByteBuffer.allocate(1024);
-                    int count = socketChannel.read(buffer);
+        Thread masterThread = new MasterThread(serverSocketChannel);
 
-                    if(count != -1) {
-                        buffer.flip();
-                        System.out.println(StandardCharsets.UTF_8.decode(buffer));
-                        buffer.clear();
-                    }
-                    else{
-                        key.cancel();
-                        socketChannel.close();
-                    }
+        masterPool.submit(masterThread);
 
-                }
-            }
-        }
     }
 }

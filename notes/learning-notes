@@ -3,3 +3,6 @@
 在blocking写法下，设置server channel的blocking为false会导致channel.accept 直接返回null。
 在non-blocking写法下，设置server channel的blocking为true会导致在将channel注册到selector时报错。
 不过暂时看来只是把accept的阻塞替换成selector.select() 并没有实质意义上的区别。
+
+0.0.2
+添加了两个线程池，accept单独使用一个线程池，socket读取使用另一个线程池。
