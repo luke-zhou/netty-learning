@@ -18,11 +18,11 @@ public class MasterThread extends Thread{
     private ServerSocketChannel serverSocketChannel;
     private ExecutorService workerPool;
 
-    public MasterThread(ServerSocketChannel serverSocketChannel) throws IOException {
+    public MasterThread(ServerSocketChannel serverSocketChannel, ExecutorService workerPool) throws IOException {
         this.serverSocketChannel = serverSocketChannel;
         selector = Selector.open();
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-        workerPool = Executors.newFixedThreadPool(5);
+        this.workerPool = workerPool;
     }
 
     @Override
